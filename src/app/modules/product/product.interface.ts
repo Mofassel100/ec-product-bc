@@ -18,3 +18,7 @@ export type TProduct = {
   inventory: TInventory;
 };
 export type ProductModel = Model<TProduct, Record<string, unknown>>;
+
+export type IProductSerchble = {
+  searchTerm?: string;
+};

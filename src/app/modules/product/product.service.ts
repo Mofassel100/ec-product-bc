@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import mongoose, { SortOrder } from "mongoose";
-
-import httpStatus from "http-status";
-import { TProduct } from "./product.interface";
+import { Types } from "mongoose";
+import { IProductSerchble, TProduct } from "./product.interface";
 import Product from "./product.model";
+
+import { productSearchableFields } from "./product.constant";
+import { ObjectId } from "mongodb";
 
 const createProduct = async (payload: TProduct) => {
   const result = await Product.create(payload);
@@ -11,85 +12,89 @@ const createProduct = async (payload: TProduct) => {
   return result;
 };
 
-// const getSingleStudent = async (id: string): Promise<IStudent | null> => {
-//   const result = await Student.findOne({ id })
-//     .populate("academicSemester")
-//     .populate("academicDepartment")
-//     .populate("academicFaculty");
-//   return result;
-// };
+// getSingle Product from DB
+const getSingleProduct = async (id: string): Promise<TProduct | null> => {
+  const obId = new Types.ObjectId(id);
+  console.log(obId, id);
+  const result = await Product.findById({ _id: new ObjectId(id) });
+  console.log("dd", result);
+  return result;
+};
 
-// const updateStudent = async (
-//   id: string,
-//   payload: Partial<IStudent>
-// ): Promise<IStudent | null> => {
-//   const isExist = await Student.findOne({ id });
+// get all product and search any product key
+const getAllProductDB = async (
+  search: IProductSerchble
+): Promise<TProduct[]> => {
+  const { searchTerm } = search;
+  const andConditions = [];
 
-//   if (!isExist) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Student not found !");
-//   }
+  if (searchTerm) {
+    andConditions.push({
+      $or: productSearchableFields.map((field) => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: "i",
+        },
+      })),
+    });
+  }
 
-//   const { name, guardian, localGuardian, ...studentData } = payload;
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
 
-//   const updatedStudentData: Partial<IStudent> = { ...studentData };
+  const result = await Product.find(whereConditions);
+  return result;
+};
 
-//   if (name && Object.keys(name).length > 0) {
-//     Object.keys(name).forEach((key) => {
-//       const nameKey = `name.${key}` as keyof Partial<IStudent>; // `name.fisrtName`
-//       (updatedStudentData as any)[nameKey] = name[key as keyof typeof name];
-//     });
-//   }
-//   if (guardian && Object.keys(guardian).length > 0) {
-//     Object.keys(guardian).forEach((key) => {
-//       const guardianKey = `guardian.${key}` as keyof Partial<IStudent>; // `guardian.fisrtguardian`
-//       (updatedStudentData as any)[guardianKey] =
-//         guardian[key as keyof typeof guardian];
-//     });
-//   }
-//   if (localGuardian && Object.keys(localGuardian).length > 0) {
-//     Object.keys(localGuardian).forEach((key) => {
-//       const localGuradianKey =
-//         `localGuardian.${key}` as keyof Partial<IStudent>; // `localGuardian.fisrtName`
-//       (updatedStudentData as any)[localGuradianKey] =
-//         localGuardian[key as keyof typeof localGuardian];
-//     });
-//   }
+// Updated product any or all data product
+const updateProduct = async (
+  id: string,
+  payload: Partial<TProduct>
+): Promise<TProduct | null> => {
+  const isExist = await Product.findOne({ _id: new ObjectId(id) });
 
-//   const result = await Student.findOneAndUpdate({ id }, updatedStudentData, {
-//     new: true,
-//   });
-//   return result;
-// };
+  if (!isExist) {
+    throw new Error("Student not found !");
+  }
 
-// const deleteStudent = async (id: string): Promise<IStudent | null> => {
-//   // check if the faculty is exist
-//   const isExist = await Student.findOne({ id });
+  const updatedStudentData: Partial<TProduct> = { ...payload };
+  const result = await Product.findOneAndUpdate(
+    { _id: new ObjectId(id) },
+    updatedStudentData,
+    {
+      new: true,
+    }
+  );
+  return result;
+};
 
-//   if (!isExist) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Student not found !");
-//   }
+// product Delete indivisual
+const deleteProduct = async (id: string): Promise<TProduct | null> => {
+  // check if the faculty is exist
 
-//   const session = await mongoose.startSession();
+  const isExist = await Product.findOne({ _id: new ObjectId(id) });
 
-//   try {
-//     session.startTransaction();
-//     //delete student first
-//     const student = await Student.findOneAndDelete({ id }, { session });
-//     if (!student) {
-//       throw new ApiError(404, "Failed to delete student");
-//     }
-//     //delete user
-//     await User.deleteOne({ id });
-//     session.commitTransaction();
-//     session.endSession();
+  if (!isExist) {
+    throw new Error("Student not found !");
+  }
 
-//     return student;
-//   } catch (error) {
-//     session.abortTransaction();
-//     throw error;
-//   }
-// };
+  try {
+    //delete student first
+    const product = await Product.findOneAndDelete({ _id: new ObjectId(id) });
+    if (!product) {
+      throw new Error("Failed to delete student");
+    }
+
+    return product;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const ProductService = {
   createProduct,
+  getSingleProduct,
+  deleteProduct,
+  updateProduct,
+  getAllProductDB,
 };
