@@ -1,8 +1,8 @@
 import Product from "../product/product.model";
 import { TOrder } from "./order.interface";
 import Order from "./order.model";
-import ApiError from "../../../errors/apiError";
 import httpStatus from "http-status";
+import { CustomError } from "../../middlewares/customError";
 
 const createOrder = async (payload: TOrder) => {
   const { productId, quantity } = payload;
@@ -12,7 +12,7 @@ const createOrder = async (payload: TOrder) => {
   });
   console.log(isProduct);
   if (!isProduct) {
-    throw new Error("Product not found");
+    throw CustomError("Product not found");
   }
   if (
     isProduct?.inventory?.quantity < quantity ||
@@ -24,10 +24,7 @@ const createOrder = async (payload: TOrder) => {
     //   message: "something went wrong",
     // });
 
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "Insufficient quantity available in inventory"
-    );
+    throw CustomError("Insufficient quantity available in inventory");
   }
   if (
     isProduct?.inventory?.quantity > 0 &&
@@ -60,7 +57,7 @@ const getAllOrdersFromDB = async (email?: string) => {
   const orders = await Order.find(findQuery);
 
   if (orders.length === 0) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Order not found");
+    throw CustomError("Order not found");
   }
 
   return orders;
