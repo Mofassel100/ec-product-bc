@@ -17,7 +17,6 @@ const getSingleProduct = async (id: string): Promise<TProduct | null> => {
   const obId = new Types.ObjectId(id);
   console.log(obId, id);
   const result = await Product.findById({ _id: new ObjectId(id) });
-  console.log("dd", result);
   return result;
 };
 
@@ -54,13 +53,13 @@ const updateProduct = async (
   const isExist = await Product.findOne({ _id: new ObjectId(id) });
 
   if (!isExist) {
-    throw new Error("Student not found !");
+    throw new Error("Product not found !");
   }
 
-  const updatedStudentData: Partial<TProduct> = { ...payload };
+  const updatedProductData: Partial<TProduct> = { ...payload };
   const result = await Product.findOneAndUpdate(
     { _id: new ObjectId(id) },
-    updatedStudentData,
+    updatedProductData,
     {
       new: true,
     }
@@ -70,19 +69,19 @@ const updateProduct = async (
 
 // product Delete indivisual
 const deleteProduct = async (id: string): Promise<TProduct | null> => {
-  // check if the faculty is exist
+  // check if the Product is exist
 
   const isExist = await Product.findOne({ _id: new ObjectId(id) });
 
   if (!isExist) {
-    throw new Error("Student not found !");
+    throw new Error("Product not found !");
   }
 
   try {
-    //delete student first
+    //delete Product first
     const product = await Product.findOneAndDelete({ _id: new ObjectId(id) });
     if (!product) {
-      throw new Error("Failed to delete student");
+      throw new Error("Failed to delete Product");
     }
 
     return product;
