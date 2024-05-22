@@ -5,17 +5,16 @@ import Product from "./product.model";
 
 import { productSearchableFields } from "./product.constant";
 import { ObjectId } from "mongodb";
+import { CustomError } from "../../middlewares/customError";
 
 const createProduct = async (payload: TProduct) => {
   const result = await Product.create(payload);
-  console.log(result);
   return result;
 };
 
 // getSingle Product from DB
 const getSingleProduct = async (id: string): Promise<TProduct | null> => {
   const obId = new Types.ObjectId(id);
-  console.log(obId, id);
   const result = await Product.findById({ _id: new ObjectId(id) });
   return result;
 };
@@ -74,7 +73,7 @@ const updateProduct = async (
   const isExist = await Product.findOne({ _id: new ObjectId(id) });
 
   if (!isExist) {
-    throw new Error("Product not found !");
+    throw CustomError("Product not found !");
   }
 
   const updatedProductData: Partial<TProduct> = { ...payload };
@@ -95,13 +94,13 @@ const deleteProduct = async (id: string): Promise<TProduct | null> => {
   const isExist = await Product.findOne({ _id: new ObjectId(id) });
 
   if (!isExist) {
-    throw new Error("Product not found !");
+    throw CustomError("Product not found !");
   }
 
   //delete Product first
   const product = await Product.findOneAndDelete({ _id: new ObjectId(id) });
   if (!product) {
-    throw new Error("Failed to delete Product");
+    throw CustomError("Failed to delete Product");
   }
 
   return product;

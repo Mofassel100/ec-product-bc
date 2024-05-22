@@ -11,6 +11,6 @@ router.post(
   validateRequest(OrderValidatedShcema.CreateZodValidationSchema),
   OrderController.createOrder
 );
-// router.get("/orders", ProductController.getAllProductDB);
+router.get("/orders", OrderController.getAllOrders);
 
 export const OrderRoutes = router;

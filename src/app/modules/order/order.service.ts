@@ -53,8 +53,20 @@ const createOrder = async (payload: TOrder) => {
   const result = (await Order.create(payload)).populate("productId");
   return result;
 };
+const getAllOrdersFromDB = async (email?: string) => {
+  // define find query conditionally (based on the presence of email)
+  const findQuery = email ? { email } : {};
 
+  const orders = await Order.find(findQuery);
+
+  if (orders.length === 0) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Order not found");
+  }
+
+  return orders;
+};
 // get all product and search any product key
 export const OrderService = {
   createOrder,
+  getAllOrdersFromDB,
 };

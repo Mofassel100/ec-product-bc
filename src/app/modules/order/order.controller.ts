@@ -1,42 +1,40 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { OrderService } from "./order.service";
-import catchAsync from "../../../shared/catchAsync";
-import sendResponse from "../../../sendResponse";
-import { TOrder } from "./order.interface";
-import httpStatus from "http-status";
 
-const createOrder = catchAsync(async (req: Request, res: Response) => {
-  const OrderData = req.body;
-  const result = await OrderService.createOrder(OrderData);
-  res.status(200).json({
-    success: true,
-    message: "Order is created successfully",
-    data: result,
-  });
-  sendResponse<TOrder>(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Admin fetched successfully !",
-    data: result,
-  });
-});
-// const getAllProductDB = async (req: Request, res: Response) => {
-//   try {
-//     const seartTerm = pick(req.query, productSerchFileds);
-//     const result = await ProductService.getAllProductDB(seartTerm);
-//     res.status(200).json({
-//       success: true,
-//       message: "Product is retaired successfully",
-//       data: result,
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       success: false,
-//       message: "something went wrong",
-//       error: err,
-//     });
-//   }
-// };
+const createOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const OrderData = req.body;
+    const result = await OrderService.createOrder(OrderData);
+    res.status(200).json({
+      success: true,
+      message: "Order is created successfully",
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+const getAllOrders = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const email = req.query.email as string | undefined;
+    const result = await OrderService.getAllOrdersFromDB(email);
+
+    res.status(200).json({
+      success: true,
+      message: email
+        ? "Orders fetched successfully for user email!"
+        : "Orders fetched successfully!",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 export const OrderController = {
   createOrder,
+  getAllOrders,
 };
