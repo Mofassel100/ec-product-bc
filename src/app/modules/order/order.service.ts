@@ -1,4 +1,3 @@
-import { ObjectId } from "mongodb";
 import Product from "../product/product.model";
 import { TOrder } from "./order.interface";
 import Order from "./order.model";
@@ -6,7 +5,7 @@ import ApiError from "../../../errors/apiError";
 import httpStatus from "http-status";
 
 const createOrder = async (payload: TOrder) => {
-  const { productId, quantity, ...data } = payload;
+  const { productId, quantity } = payload;
 
   const isProduct = await Product.findById({
     _id: productId,

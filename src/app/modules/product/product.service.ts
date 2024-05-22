@@ -98,17 +98,13 @@ const deleteProduct = async (id: string): Promise<TProduct | null> => {
     throw new Error("Product not found !");
   }
 
-  try {
-    //delete Product first
-    const product = await Product.findOneAndDelete({ _id: new ObjectId(id) });
-    if (!product) {
-      throw new Error("Failed to delete Product");
-    }
-
-    return product;
-  } catch (error) {
-    throw error;
+  //delete Product first
+  const product = await Product.findOneAndDelete({ _id: new ObjectId(id) });
+  if (!product) {
+    throw new Error("Failed to delete Product");
   }
+
+  return product;
 };
 
 export const ProductService = {
