@@ -44,6 +44,27 @@ const getAllProductDB = async (
   const result = await Product.find(whereConditions);
   return result;
 };
+const getAllPDB = async (search: IProductSerchble): Promise<TProduct[]> => {
+  const { searchTerm } = search;
+  const andConditions = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      $or: productSearchableFields.map((field) => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: "i",
+        },
+      })),
+    });
+  }
+
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
+
+  const result = await Product.find(whereConditions);
+  return result;
+};
 
 // Updated product any or all data product
 const updateProduct = async (
@@ -96,4 +117,5 @@ export const ProductService = {
   deleteProduct,
   updateProduct,
   getAllProductDB,
+  getAllPDB,
 };

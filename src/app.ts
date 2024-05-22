@@ -3,6 +3,7 @@ import express, { Application, NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
 import routes from "./app/routes";
+import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 
 const app: Application = express();
 
@@ -12,17 +13,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use('/api/v1/users/', UserRoutes);
-// app.use('/api/v1/academic-semesters', AcademicSemesterRoutes);
 app.use("/api", routes);
 
-//Testing
-// app.get("/", async (req: Request, res: Response, next: NextFunction) => {
-//   console.log(res.send("database connected"));
-// });
-
-//global error handler
-// app.use(globalErrorHandler);
+// global error handler
+app.use(globalErrorHandler);
 
 //handle not found
 app.use((req: Request, res: Response, next: NextFunction) => {

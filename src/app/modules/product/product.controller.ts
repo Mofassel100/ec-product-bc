@@ -78,7 +78,7 @@ const deleteProduct = async (req: Request, res: Response) => {
     const result = await ProductService.deleteProduct(id);
     res.status(200).json({
       success: true,
-      message: "Product is retaired successfully",
+      message: "Product is deleted successfully",
       data: result,
     });
   } catch (err) {
